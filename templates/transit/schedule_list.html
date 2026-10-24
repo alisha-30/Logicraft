@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Public Transit Schedules | LogiCraft{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card p-4 mb-4 bg-white shadow-sm">
+            <h4 class="fw-bold mb-3"><i class="bi bi-bus-front me-2 text-primary"></i>Transit Schedules & Seat Booking</h4>
+            <p class="text-muted small">
+                Find scheduled routes and book tickets directly. Seat allocations are strictly constrained by vehicle capacity.
+            </p>
+            <form method="GET" action="{% url 'transit_schedules' %}" class="row g-2">
+                <div class="col-12 col-md-5">
+                    <input type="text" name="origin" value="{{ origin_query }}" class="form-control" placeholder="Origin Stop (e.g. Central)">
+                </div>
+                <div class="col-12 col-md-5">
+                    <input type="text" name="destination" value="{{ dest_query }}" class="form-control" placeholder="Destination Stop (e.g. Airport)">
+                </div>
+                <div class="col-12 col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                        Filter Routes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Timetable Cards -->
+        {% if schedules %}
+            <div class="row g-3">
+                {% for item in schedules %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card h-100 p-3 bg-white">
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                <span class="badge bg-dark">{{ item.schedule.route.route_code }}</span>
+                                <span class="fw-bold text-success">₹{{ item.schedule.fare }}</span>
+                            </div>
+                            <h5 class="fw-bold mb-1">
+                                {{ item.schedule.route.origin_stop }} <i class="bi bi-arrow-right small text-muted"></i> {{ item.schedule.route.destination_stop }}
+                            </h5>
+                            <div class="small text-muted mb-3">
+                                <i class="bi bi-clock me-1"></i> Duration: {{ item.schedule.route.duration_minutes }} mins
+                            </div>
+                            
+                            <div class="bg-light p-2 rounded small mb-3">
+                                <div><strong>Departure:</strong> {{ item.schedule.departure_time|date:"d M Y, H:i" }}</div>
+                                <div><strong>Arrival:</strong> {{ item.schedule.arrival_time|date:"d M Y, H:i" }}</div>
+                                <div><strong>Bus:</strong> {{ item.schedule.vehicle.registration_number }} (Cap: {{ item.schedule.vehicle.capacity }})</div>
+                            </div>
+
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <div>
+                                    {% if item.seats_left > 0 %}
+                                        <span class="badge bg-success-subtle text-success border border-success">
+                                            {{ item.seats_left }} seats left
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Sold Out</span>
+                                    {% endif %}
+                                </div>
+                                {% if item.seats_left > 0 %}
+                                    <a href="{% url 'book_ticket' item.schedule.id %}" class="btn btn-sm btn-primary">
+                                        Book Seat
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-secondary" disabled>Fully Booked</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card p-5 text-center text-muted">
+                <i class="bi bi-calendar-x fs-1 mb-2"></i>
+                <h5>No schedules match your search</h5>
+                <p class="small mb-0">Try clearing the search filters or create new schedules in the Staff Admin.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

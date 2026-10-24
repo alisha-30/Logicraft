@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Warehouse Inventory Catalog - LogiCraft{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-3 shadow-sm border">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h2 class="h4 mb-0 fw-bold text-dark">
+                        <i class="bi bi-boxes text-primary me-2"></i>Warehouse Inventory Catalog
+                    </h2>
+                </div>
+                <p class="text-muted small mb-0">
+                    Physical stock cataloging across regional depot facilities. All SKUs are bound to registered warehouses.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filtering Card -->
+<div class="card p-3 p-md-4 mb-4 bg-white shadow-sm border-0">
+    <form method="GET" action="{% url 'inventory_catalog' %}" class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+            <label class="form-label small fw-semibold text-uppercase text-muted">Filter by Warehouse Depot</label>
+            <select name="warehouse" class="form-select">
+                <option value="">-- All Regional Depots (8) --</option>
+                {% for wh in warehouses %}
+                    <option value="{{ wh.code }}" {% if selected_warehouse == wh.code %}selected{% endif %}>
+                        {{ wh.code }} - {{ wh.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 col-md-3">
+            <label class="form-label small fw-semibold text-uppercase text-muted">Category</label>
+            <select name="category" class="form-select">
+                <option value="">-- All Categories --</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>
+                        {{ cat }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 col-md-3">
+            <label class="form-label small fw-semibold text-uppercase text-muted">Search SKU or Name</label>
+            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="e.g. Solar, SKU-SOL-101">
+        </div>
+
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                <i class="bi bi-funnel me-1"></i> Filter
+            </button>
+            {% if selected_warehouse or selected_category or query %}
+                <a href="{% url 'inventory_catalog' %}" class="btn btn-outline-secondary" title="Clear Filters">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Summary Stats Bar -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 text-muted small">
+    <div>
+        Showing <strong>{{ total_skus }}</strong> SKU catalog record(s) &bull; Total on-hand volume: <strong>{{ total_units }}</strong> units
+    </div>
+    <div class="d-flex gap-2 mt-2 mt-sm-0">
+        <a href="/admin/logistics/inventoryitem/add/" class="btn btn-sm btn-outline-dark" target="_blank">
+            <i class="bi bi-plus-circle me-1"></i> Catalog New SKU (Staff)
+        </a>
+        <a href="{% url 'shipment_dispatch' %}" class="btn btn-sm btn-primary">
+            <i class="bi bi-send me-1"></i> Dispatch Order
+        </a>
+    </div>
+</div>
+
+<!-- Inventory Items Table -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                    <tr>
+                        <th style="min-width: 140px;">SKU Code</th>
+                        <th style="min-width: 200px;">Product Name</th>
+                        <th style="min-width: 130px;">Category</th>
+                        <th style="min-width: 180px;">Assigned Depot</th>
+                        <th style="min-width: 130px;">Quantity on Hand</th>
+                        <th class="text-end" style="min-width: 110px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>
+                            <code class="fw-bold text-dark">{{ item.sku }}</code>
+                        </td>
+                        <td>
+                            <strong>{{ item.name }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-secondary border">{{ item.category }}</span>
+                        </td>
+                        <td>
+                            <strong>{{ item.warehouse.code }}</strong>
+                            <div class="text-muted small">{{ item.warehouse.name|truncatechars:24 }}</div>
+                        </td>
+                        <td>
+                            {% if item.quantity > 5 %}
+                                <span class="badge bg-success fs-6">{{ item.quantity }} {{ item.unit }}</span>
+                            {% elif item.quantity > 0 %}
+                                <span class="badge bg-warning text-dark fs-6">{{ item.quantity }} {{ item.unit }}</span>
+                            {% else %}
+                                <span class="badge bg-danger fs-6">0 {{ item.unit }} (OUT OF STOCK)</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            {% if item.quantity > 0 %}
+                                <a href="{% url 'shipment_dispatch' %}" class="btn btn-sm btn-outline-primary py-0" title="Dispatch Outbound Shipment">
+                                    <i class="bi bi-send me-1"></i> Dispatch
+                                </a>
+                            {% else %}
+                                <a href="/admin/logistics/inventoryitem/{{ item.id }}/change/" class="btn btn-sm btn-outline-secondary py-0" target="_blank" title="Restock in Admin">
+                                    Restock
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-boxes fs-1 d-block mb-2"></i>
+                            <h5>No inventory items match your criteria</h5>
+                            <p class="small mb-0">Try clearing your filters or catalog new items in the Staff Admin.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Track Cargo | LogiCraft{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Search Bar -->
+        <div class="card p-4 mb-4 bg-white shadow-sm">
+            <h4 class="fw-bold mb-3"><i class="bi bi-geo-alt me-2 text-primary"></i>Track Shipment</h4>
+            <form method="GET" action="{% url 'track_shipment' %}" class="row g-2">
+                <div class="col-md-9">
+                    <input type="text" name="q" value="{{ query }}" class="form-control form-control-lg" placeholder="Enter tracking number (e.g. LC-TRK-20261010-XXXXXX)" required>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold">
+                        Search Status
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if not_found %}
+            <div class="alert alert-warning text-center py-4">
+                <i class="bi bi-exclamation-triangle fs-2 d-block mb-2"></i>
+                <h5 class="fw-bold">Tracking Number Not Found</h5>
+                <p class="mb-0 text-muted">No shipment was found matching <code>{{ query }}</code>. Please double-check the tracking ID or contact support.</p>
+            </div>
+        {% elif shipment %}
+            <!-- Shipment Details Card -->
+            <div class="card p-4 mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-4">
+                    <div>
+                        <span class="text-muted small">Tracking Number:</span>
+                        <h4 class="fw-bold mb-0 text-primary">{{ shipment.tracking_number }}</h4>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-muted small d-block">Current Status:</span>
+                        {% if shipment.status == 'DELIVERED' %}
+                            <span class="badge bg-success fs-6">Delivered</span>
+                        {% elif shipment.status == 'IN_TRANSIT' %}
+                            <span class="badge bg-primary fs-6">In Transit</span>
+                        {% elif shipment.status == 'DISPATCHED' %}
+                            <span class="badge bg-info text-dark fs-6">Dispatched</span>
+                        {% elif shipment.status == 'PENDING' %}
+                            <span class="badge bg-secondary fs-6">Pending Dispatch</span>
+                        {% else %}
+                            <span class="badge bg-danger fs-6">{{ shipment.status }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Info Grid -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <span class="text-muted small d-block">Origin Warehouse</span>
+                        <strong>{{ shipment.origin_warehouse.name }}</strong>
+                        <div class="small text-muted">{{ shipment.origin_warehouse.address }}</div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <span class="text-muted small d-block">Destination</span>
+                        <strong class="text-break">{{ shipment.destination_address }}</strong>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <span class="text-muted small d-block">Item & Quantity</span>
+                        <strong>{{ shipment.item.name }}</strong>
+                        <div class="small text-muted">{{ shipment.quantity }} {{ shipment.item.unit }}</div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <span class="text-muted small d-block">Assigned Vehicle & Driver</span>
+                        {% if shipment.vehicle %}
+                            <strong>{{ shipment.vehicle.registration_number }}</strong>
+                            <div class="small text-muted">{{ shipment.vehicle.get_vehicle_type_display }}</div>
+                            {% if shipment.driver_name %}
+                                <div class="small text-primary"><i class="bi bi-person-badge me-1"></i>{{ shipment.driver_name }}</div>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">Awaiting Assignment</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Progress Stepper -->
+                <div class="p-3 bg-light rounded mb-4 overflow-x-auto">
+                    <h6 class="fw-bold mb-3 small text-uppercase text-secondary">Milestone Progress</h6>
+                    <div class="d-flex justify-content-between text-center position-relative" style="min-width: 280px;">
+                        <div class="col">
+                            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                            <div class="small fw-semibold mt-1">Pending</div>
+                        </div>
+                        <div class="col">
+                            {% if shipment.status != 'PENDING' %}
+                                <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                            {% else %}
+                                <i class="bi bi-circle text-muted fs-4"></i>
+                            {% endif %}
+                            <div class="small fw-semibold mt-1">Dispatched</div>
+                        </div>
+                        <div class="col">
+                            {% if shipment.status == 'IN_TRANSIT' or shipment.status == 'DELIVERED' %}
+                                <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                            {% else %}
+                                <i class="bi bi-circle text-muted fs-4"></i>
+                            {% endif %}
+                            <div class="small fw-semibold mt-1">In Transit</div>
+                        </div>
+                        <div class="col">
+                            {% if shipment.status == 'DELIVERED' %}
+                                <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                            {% else %}
+                                <i class="bi bi-circle text-muted fs-4"></i>
+                            {% endif %}
+                            <div class="small fw-semibold mt-1">Delivered</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checkpoints Audit Timeline -->
+                <h6 class="fw-bold mb-3"><i class="bi bi-signpost-split me-2"></i>Checkpoint Timeline</h6>
+                {% if shipment.checkpoints.all %}
+                    <ul class="list-group list-group-flush">
+                        {% for cp in shipment.checkpoints.all %}
+                            <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center px-0 gap-1 gap-sm-0">
+                                <div>
+                                    <strong>{{ cp.location_name }}</strong>
+                                    <div class="text-muted small">{{ cp.status_note }}</div>
+                                </div>
+                                <span class="badge bg-light text-secondary border mt-1 mt-sm-0 align-self-start align-self-sm-center">
+                                    {{ cp.timestamp|date:"d M Y, H:i" }}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-muted small py-2">
+                        <em>No route checkpoints logged yet. Checkpoint events are updated as cargo moves.</em>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

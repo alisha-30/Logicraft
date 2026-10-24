@@ -1,0 +1,9 @@
+id,code,name,address,capacity_sqft,created_at
+1,WH-DEL-01,Northern Regional Hub - Delhi,"Okhla Industrial Area Phase III, New Delhi",65000,2026-05-13 09:00:00
+2,WH-MUM-01,Western Coastal Depot - Mumbai,"Bhiwandi Logistics Park, Mumbai, Maharashtra",80000,2026-07-19 09:00:00
+3,WH-BLR-01,Southern Tech Distribution Hub,"Peenya Industrial Estate, Bengaluru, Karnataka",45000,2026-07-30 09:00:00
+4,WH-KOL-01,Eastern Freight Center - Kolkata,"Taratala Road, Kolkata, West Bengal",40000,2026-04-30 09:00:00
+5,WH-HYD-01,Central Cargo Depot - Hyderabad,"Sanathnagar Industrial Area, Hyderabad, Telangana",35000,2026-06-28 09:00:00
+6,WH-AMD-01,Gujarat Logistics Terminal - Ahmedabad,"Changodar Industrial Hub, Ahmedabad, Gujarat",30000,2026-07-02 09:00:00
+7,WH-CHN-01,Chennai Port Logistics Hub,"Ambattur Industrial Estate, Chennai, Tamil Nadu",38000,2026-07-05 09:00:00
+8,WH-PUN-01,Pune Distribution Facility,"Bhosari MIDC, Pune, Maharashtra",28000,2026-07-16 09:00:00

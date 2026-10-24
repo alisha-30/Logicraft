@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiCraft - Low-Fidelity UI Wireframes</title>
+    <style>
+        /* Grayscale Wireframe Stylesheet - Pure CSS, No External Libraries */
+        :root {
+            --bg-canvas: #f6f6f6;
+            --bg-card: #ffffff;
+            --border-color: #333333;
+            --border-light: #cccccc;
+            --text-main: #111111;
+            --text-muted: #666666;
+            --box-gray: #eeeeee;
+            --box-gray-dark: #dddddd;
+            --badge-bg: #e2e2e2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-main);
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* Top Navigation Bar */
+        header {
+            background: #ffffff;
+            border: 2px solid var(--border-color);
+            padding: 12px 16px;
+            margin-bottom: 20px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .brand-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .nav-btn {
+            background: var(--box-gray);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .nav-btn.active {
+            background: var(--border-color);
+            color: #ffffff;
+        }
+
+        .nav-btn.final-tag {
+            border-style: dashed;
+        }
+
+        /* Main Screen Container */
+        .screen-container {
+            display: none;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            padding: 20px;
+            min-height: 520px;
+        }
+
+        .screen-container.active {
+            display: block;
+        }
+
+        /* Final Scope Dashed Border */
+        .screen-container.final-scope {
+            border: 2px dashed #666666;
+            background: #fafafa;
+        }
+
+        /* Screen Header & Badges */
+        .screen-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .screen-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .badge-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .id-badge {
+            background: var(--badge-bg);
+            border: 1px solid var(--border-color);
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: monospace;
+            border-radius: 3px;
+        }
+
+        .final-badge {
+            background: #ffffff;
+            border: 1px dashed #444444;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Layout Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="password"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            font-size: 13px;
+        }
+
+        .help-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #ffffff;
+            border: 2px solid var(--border-color);
+            padding: 8px 16px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--border-color);
+            color: #ffffff;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Wireframe Boxes & Chart Placeholders */
+        .wireframe-box {
+            border: 1px solid var(--border-color);
+            background: var(--box-gray);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .chart-placeholder {
+            border: 2px dashed var(--border-color);
+            background: var(--box-gray-dark);
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            color: #333333;
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 16px;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+            margin-bottom: 16px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px 10px;
+            text-align: left;
+        }
+
+        th {
+            background: var(--box-gray-dark);
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* Progress Stepper Wireframe */
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .step-item {
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .step-circle {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--border-color);
+            background: #ffffff;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .step-item.active .step-circle {
+            background: var(--border-color);
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <header>
+        <div class="header-top">
+            <div class="brand-title">[WIREFRAME] LogiCraft UI Prototype</div>
+            <div style="font-size: 12px; color: var(--text-muted);">
+                Architecture: Python Full-Stack (Django + SQLite) | Version: 1.0
+            </div>
+        </div>
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="showScreen('screen-index')">0. Screen Index</button>
+            <button class="nav-btn" onclick="showScreen('screen-home')">1. Home & Login</button>
+            <button class="nav-btn" onclick="showScreen('screen-dashboard')">2. Ops Dashboard (MVP)</button>
+            <button class="nav-btn" onclick="showScreen('screen-inventory')">3. Warehouse Catalog (MVP)</button>
+            <button class="nav-btn" onclick="showScreen('screen-dispatch')">4. Shipment Dispatch (MVP)</button>
+            <button class="nav-btn" onclick="showScreen('screen-tracking')">5. Public Tracking (MVP)</button>
+            <button class="nav-btn final-tag" onclick="showScreen('screen-fleet')">6. Fleet & Maint. [Final]</button>
+            <button class="nav-btn final-tag" onclick="showScreen('screen-transit')">7. Transit & Ticketing [Final]</button>
+        </div>
+    </header>
+
+
+    <!-- ============================================================== -->
+    <!-- SCREEN 0: SCREEN LIST & TRACEABILITY INDEX                      -->
+    <!-- ============================================================== -->
+    <section id="screen-index" class="screen-container active">
+        <div class="screen-meta">
+            <div>
+                <div class="screen-title">Screen List & Traceability Catalog</div>
+                <p class="help-text">Direct mapping of every UI screen to User Stories, Business Rules, and MVP/Stretch Scope.</p>
+            </div>
+            <div class="badge-group">
+                <span class="id-badge">DOC-REF</span>
+                <span class="id-badge">SPEC-V1.0</span>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Screen #</th>
+                    <th>Screen Name</th>
+                    <th>User Story ID</th>
+                    <th>Business Rule</th>
+                    <th>Scope Status</th>
+                    <th>Primary User / Stakeholder</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>SCR-00</strong></td>
+                    <td>Screen List & Traceability Catalog</td>
+                    <td><code>N/A</code></td>
+                    <td><code>N/A</code></td>
+                    <td>Project Index</td>
+                    <td>Student Evaluator / Developer</td>
+                    <td><button class="btn" style="padding: 2px 8px;" onclick="showScreen('screen-index')">View</button></td>
+                </tr>
+                <tr>
+                    <td><strong>SCR-01</strong></td>
+                    <td>Portal Home & Staff Login</td>
+                    <td><code>US-01 / US-08</code></td>
+                    <td><code>BR-08</code> (Privacy)</td>
+                    <td>Baseline Entry</td>
+                    <td>All Stakeholders / Public</td>
+                    <td><button class="btn" style="padding: 2px 8px;" onclick="showScreen('screen-home')">View</button></td>
+                </tr>
+                <tr>
+                    <td><strong>SCR-02</strong></td>
+                    <td>Operations Performance Dashboard</td>
+                    <td><code>US-01</code></td>
+                    <td><code>BR-01</code></td>
+                    <td><strong>MVP (Report)</strong></td>
+                    <td>Operations Director</td>
+                    <td><button class="btn" style="padding: 2px 8px;" onclick="showScreen('screen-dashboard')">View</button></td>
+                </tr>
+                <tr>
+                    <td><strong>SCR-03</strong></td>
+                    <td>Warehouse Inventory Cataloging</td>
+                    <td><code>US-02</code></td>
+                    <td><code>BR-02</code></td>
+                    <td><strong>MVP (Data)</strong></td>
+                    <td>Warehouse Supervisor</td>
+                    <td><button class="btn" style="padding: 2px 8px;" onclick="showScreen('screen-inventory')">View</button></td>
+                </tr>
+                <tr>
+                    <td><strong>SCR-04</strong></td>
+                    <td>Outbound Shipment Dispatch & Stock Decrement</td>
+                    <td><code>US-03</code></td>
+                    <td><code>BR-03</code></td>
+                    <td><strong>MVP (Logic)</strong></td>
+                    <td>Fleet Dispatcher / Supervisor</td>
+                    <td><button class="btn" style="padding: 2px 8px;" onclick="showScreen('screen-dispatch')">View</button></td>
+                </tr>
+                <tr>
+                    <td><strong>SCR-05</strong></td>
+                    <td>Public Cargo Tracking & Checkpoint History</td>
+                    <td><code>US-05</code></td>
+                    <td><code>BR-05</code></td>
+                    <td><strong>MVP (Screen)</strong></td>
+                    <td>Cargo Customer (Public)</td>
+                    <td><button class="btn" style="padding: 2px 8px;" onclick="showScreen('screen-tracking')">View</button></td>
+                </tr>
+                <tr style="background: #fdfdfd; font-style: italic;">
+                    <td><strong>SCR-06</strong></td>
+                    <td>Fleet Management & Maintenance Lockout</td>
+                    <td><code>US-04</code></td>
+                    <td><code>BR-04</code></td>
+                    <td>Final (Stretch)</td>
+                    <td>Fleet Dispatcher / Mechanic</td>
+                    <td><button class="btn" style="padding: 2px 8px;" onclick="showScreen('screen-fleet')">View</button></td>
+                </tr>
+                <tr style="background: #fdfdfd; font-style: italic;">
+                    <td><strong>SCR-07</strong></td>
+                    <td>Transit Schedules & Seat Booking</td>
+                    <td><code>US-06</code></td>
+                    <td><code>BR-06</code></td>
+                    <td>Final (Stretch)</td>
+                    <td>Public Commuter</td>
+                    <td><button class="btn" style="padding: 2px 8px;" onclick="showScreen('screen-transit')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SCREEN 1: PORTAL HOME & LOGIN                                  -->
+    <!-- ============================================================== -->
+    <section id="screen-home" class="screen-container">
+        <div class="screen-meta">
+            <div>
+                <div class="screen-title">Portal Entry & Staff Authentication</div>
+                <p class="help-text">Public search access point and authenticated staff management portal.</p>
+            </div>
+            <div class="badge-group">
+                <span class="id-badge">ENTRY-01</span>
+                <span class="id-badge">BR-08 (Privacy)</span>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Left: Public Quick Search -->
+            <div class="wireframe-box">
+                <h3 style="margin-bottom: 12px;">Public Cargo Tracking Lookup</h3>
+                <p class="help-text" style="margin-bottom: 12px;">Customers can track parcels without creating an account or logging in.</p>
+                <div class="form-group">
+                    <label>Tracking Code</label>
+                    <input type="text" placeholder="e.g. LC-TRK-20261010-DEMO01">
+                </div>
+                <button class="btn btn-primary" onclick="showScreen('screen-tracking')">Track Shipment &rarr;</button>
+
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-light);">
+                
+                <h4 style="margin-bottom: 6px;">Public Bus Timetables</h4>
+                <p class="help-text" style="margin-bottom: 10px;">Check fixed transit lines and seat reservations.</p>
+                <button class="btn" onclick="showScreen('screen-transit')">View Bus Schedules &rarr;</button>
+            </div>
+
+            <!-- Right: Staff Login Box -->
+            <div class="wireframe-box">
+                <h3 style="margin-bottom: 12px;">Staff / Dispatcher Sign-In</h3>
+                <p class="help-text" style="margin-bottom: 12px;">Authorized access for Warehouse Supervisors and Dispatchers.</p>
+                <div class="form-group">
+                    <label>Username / Staff ID</label>
+                    <input type="text" placeholder="e.g. admin">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" placeholder="••••••••••••">
+                </div>
+                <div class="form-group">
+                    <label>Role Domain</label>
+                    <select>
+                        <option>Operations Director</option>
+                        <option>Warehouse Supervisor</option>
+                        <option>Fleet Dispatcher</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="showScreen('screen-dashboard')">Sign In to Workspace</button>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SCREEN 2: OPERATIONS PERFORMANCE DASHBOARD (MVP REPORT)        -->
+    <!-- ============================================================== -->
+    <section id="screen-dashboard" class="screen-container">
+        <div class="screen-meta">
+            <div>
+                <div class="screen-title">Operations Performance Dashboard</div>
+                <p class="help-text">Real-time aggregated counts across all regional depots and transport channels.</p>
+            </div>
+            <div class="badge-group">
+                <span class="id-badge">US-01</span>
+                <span class="id-badge">BR-01</span>
+                <span class="id-badge">MVP (Report)</span>
+            </div>
+        </div>
+
+        <!-- Metric Counter Cards (TR-01) -->
+        <div class="grid-4" style="margin-bottom: 20px;">
+            <div class="wireframe-box" style="text-align: center;">
+                <label>Total Warehouses</label>
+                <div style="font-size: 28px; font-weight: 700;">8</div>
+                <span class="help-text">Active Depots</span>
+            </div>
+            <div class="wireframe-box" style="text-align: center;">
+                <label>Catalog SKUs</label>
+                <div style="font-size: 28px; font-weight: 700;">80</div>
+                <span class="help-text">Tracked Inventory Items</span>
+            </div>
+            <div class="wireframe-box" style="text-align: center;">
+                <label>Fleet Available</label>
+                <div style="font-size: 28px; font-weight: 700;">18 / 25</div>
+                <span class="help-text">Ready for Dispatch</span>
+            </div>
+            <div class="wireframe-box" style="text-align: center;">
+                <label>Active Shipments</label>
+                <div style="font-size: 28px; font-weight: 700;">35</div>
+                <span class="help-text">In Processing / Transit</span>
+            </div>
+        </div>
+
+        <!-- Wireframe Analytical Visualizations -->
+        <div class="grid-2">
+            <div class="chart-placeholder">
+                [Bar Chart: Active Stock Volume (Units) by Regional Warehouse Depot]
+            </div>
+            <div class="chart-placeholder">
+                [Donut Chart: Fleet Utilization — Available (70%) vs In-Transit (20%) vs Maintenance (10%)]
+            </div>
+        </div>
+
+        <!-- Recent Shipments Table -->
+        <h4 style="margin: 16px 0 6px 0;">Recent Outbound Shipments</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tracking Code</th>
+                    <th>Origin Depot</th>
+                    <th>Item & Qty</th>
+                    <th>Assigned Vehicle</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>LC-TRK-20261001-902112</code></td>
+                    <td>WH-DEL-01 (Delhi Hub)</td>
+                    <td>5kVA Solar Inverter (x4)</td>
+                    <td>DL-01-TR-9021</td>
+                    <td><strong>IN_TRANSIT</strong></td>
+                </tr>
+                <tr>
+                    <td><code>LC-TRK-20261002-441209</code></td>
+                    <td>WH-MUM-01 (Mumbai Depot)</td>
+                    <td>Emergency Trauma Kit (x10)</td>
+                    <td>MH-02-VN-4412</td>
+                    <td><strong>DELIVERED</strong></td>
+                </tr>
+                <tr>
+                    <td><code>LC-TRK-20261003-883144</code></td>
+                    <td>WH-BLR-01 (Bengaluru Hub)</td>
+                    <td>Lithium Battery Pack (x2)</td>
+                    <td>KA-05-TR-6601</td>
+                    <td><strong>DISPATCHED</strong></td>
+                </tr>
+                <tr>
+                    <td><code>LC-TRK-20261004-110022</code></td>
+                    <td>WH-DEL-01 (Delhi Hub)</td>
+                    <td>Portable Oxygen Unit (x1)</td>
+                    <td><em>Unassigned</em></td>
+                    <td><strong>PENDING</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SCREEN 3: WAREHOUSE INVENTORY CATALOGING (MVP DATA)            -->
+    <!-- ============================================================== -->
+    <section id="screen-inventory" class="screen-container">
+        <div class="screen-meta">
+            <div>
+                <div class="screen-title">Warehouse Inventory Cataloging</div>
+                <p class="help-text">Per-warehouse SKU catalog and physical shelf count management.</p>
+            </div>
+            <div class="badge-group">
+                <span class="id-badge">US-02</span>
+                <span class="id-badge">BR-02</span>
+                <span class="id-badge">MVP (Data)</span>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Add Item Form -->
+            <div class="wireframe-box">
+                <h4 style="margin-bottom: 12px;">Register New Stock Item</h4>
+                <div class="form-group">
+                    <label>Storage Warehouse (*Required [BR-02])</label>
+                    <select>
+                        <option>WH-DEL-01: Northern Regional Hub - Delhi</option>
+                        <option>WH-MUM-01: Western Coastal Depot - Mumbai</option>
+                        <option>WH-BLR-01: Southern Tech Distribution Hub</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>SKU Code (Unique)</label>
+                    <input type="text" placeholder="e.g. SKU-SOL-105">
+                </div>
+                <div class="form-group">
+                    <label>Item Name Description</label>
+                    <input type="text" placeholder="e.g. 5kVA Solar Inverter">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select>
+                        <option>Renewable Energy</option>
+                        <option>Healthcare Supplies</option>
+                        <option>Industrial Hardware</option>
+                    </select>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Initial Quantity (*Non-negative)</label>
+                        <input type="number" min="0" value="25">
+                    </div>
+                    <div class="form-group">
+                        <label>Unit of Measure</label>
+                        <input type="text" value="units">
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block">Save Item to Warehouse Ledger</button>
+            </div>
+
+            <!-- Warehouse Stock Summary -->
+            <div>
+                <div class="chart-placeholder" style="height: 140px;">
+                    [Bar Chart: Storage Capacity Utilization (sq ft) by Warehouse]
+                </div>
+
+                <div class="wireframe-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4>Current Catalog Ledger</h4>
+                        <input type="text" placeholder="Filter by SKU or name..." style="width: 200px;">
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Item Name</th>
+                                <th>Depot</th>
+                                <th>Qty</th>
+                                <th>Unit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>SKU-SOL-101</code></td>
+                                <td>5kVA Solar Inverter</td>
+                                <td>WH-DEL-01</td>
+                                <td><strong>45</strong></td>
+                                <td>units</td>
+                            </tr>
+                            <tr>
+                                <td><code>SKU-MED-202</code></td>
+                                <td>Emergency Trauma Kit</td>
+                                <td>WH-DEL-01</td>
+                                <td><strong>120</strong></td>
+                                <td>boxes</td>
+                            </tr>
+                            <tr>
+                                <td><code>SKU-ZERO-999</code></td>
+                                <td>[EDGE] Zero-Stock Inverter</td>
+                                <td>WH-DEL-01</td>
+                                <td><strong style="color: #666;">0</strong></td>
+                                <td>units</td>
+                            </tr>
+                            <tr>
+                                <td><code>SKU-LOW-003</code></td>
+                                <td>[EDGE] Low-Stock Emergency Pack</td>
+                                <td>WH-DEL-01</td>
+                                <td><strong>3</strong></td>
+                                <td>boxes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SCREEN 4: OUTBOUND SHIPMENT DISPATCH (MVP LOGIC)                -->
+    <!-- ============================================================== -->
+    <section id="screen-dispatch" class="screen-container">
+        <div class="screen-meta">
+            <div>
+                <div class="screen-title">Outbound Shipment Dispatch & Stock Decrement</div>
+                <p class="help-text">Assign vehicles, generate tracking numbers, and transactionally deduct stock.</p>
+            </div>
+            <div class="badge-group">
+                <span class="id-badge">US-03</span>
+                <span class="id-badge">BR-03</span>
+                <span class="id-badge">MVP (Logic)</span>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Create Outbound Shipment Form -->
+            <div class="wireframe-box">
+                <h4 style="margin-bottom: 12px;">Create Outbound Dispatch Order</h4>
+                <div class="form-group">
+                    <label>Origin Warehouse (*Enforces matching stock [BR-02])</label>
+                    <select>
+                        <option>WH-DEL-01: Northern Regional Hub - Delhi</option>
+                        <option>WH-MUM-01: Western Coastal Depot - Mumbai</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Item to Ship</label>
+                    <select>
+                        <option>SKU-SOL-101: 5kVA Solar Inverter (Available Stock: 45 units)</option>
+                        <option>SKU-MED-202: Emergency Trauma Kit (Available Stock: 120 boxes)</option>
+                        <option>SKU-ZERO-999: Zero-Stock Inverter (Available Stock: 0 units - Will Reject!)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Quantity to Ship (*Must be &le; Available Stock [BR-03])</label>
+                    <input type="number" min="1" value="4">
+                </div>
+                <div class="form-group">
+                    <label>Assign Vehicle (*Only Available Vehicles [BR-04])</label>
+                    <select>
+                        <option>DL-01-TR-9021 (Cargo Truck - Capacity 5000 kg) [AVAILABLE]</option>
+                        <option>MH-02-VN-4412 (Delivery Van - Capacity 1500 kg) [AVAILABLE]</option>
+                        <option disabled>DL-01-TR-3399 (Cargo Truck) [MAINTENANCE - LOCKED]</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Destination Address</label>
+                    <textarea rows="2" placeholder="e.g. Plot #42/B, Industrial Sector-62, Noida (U.P.) - 201309"></textarea>
+                </div>
+                <button class="btn btn-primary btn-block">Confirm Dispatch & Deduct Inventory</button>
+            </div>
+
+            <!-- Active Dispatches Overview -->
+            <div>
+                <div class="wireframe-box">
+                    <h4 style="margin-bottom: 10px;">Dispatch Verification Log</h4>
+                    <p class="help-text" style="margin-bottom: 12px;">
+                        When status transitions to <code>DISPATCHED</code>, origin warehouse stock is decremented immediately.
+                    </p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tracking Code</th>
+                                <th>Item & Qty</th>
+                                <th>Stock Before &rarr; After</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>LC-TRK-20261010-DEMO01</code></td>
+                                <td>Solar Inverter (x4)</td>
+                                <td>45 &rarr; <strong>41 units</strong></td>
+                                <td><span style="background: #333; color: #fff; padding: 2px 6px; font-size: 11px;">DISPATCHED</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>LC-TRK-20261010-DEMO02</code></td>
+                                <td>Trauma Kit (x10)</td>
+                                <td>120 &rarr; <strong>110 boxes</strong></td>
+                                <td><span style="background: #333; color: #fff; padding: 2px 6px; font-size: 11px;">IN_TRANSIT</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>LC-TRK-20261010-PEND01</code></td>
+                                <td>Emergency Pack (x1)</td>
+                                <td>Awaiting Dispatch</td>
+                                <td><span style="border: 1px solid #333; padding: 2px 6px; font-size: 11px;">PENDING</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="wireframe-box">
+                    <h4>Add Transit Checkpoint (Audit Trail)</h4>
+                    <div class="form-group" style="margin-top: 8px;">
+                        <label>Location Waypoint Name</label>
+                        <input type="text" placeholder="e.g. Yamuna Expressway Toll Plaza">
+                    </div>
+                    <div class="form-group">
+                        <label>Status Note</label>
+                        <input type="text" placeholder="e.g. Package cleared inter-state toll corridor">
+                    </div>
+                    <button class="btn">Log Checkpoint Milestone</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SCREEN 5: PUBLIC CARGO TRACKING (MVP SCREEN)                   -->
+    <!-- ============================================================== -->
+    <section id="screen-tracking" class="screen-container">
+        <div class="screen-meta">
+            <div>
+                <div class="screen-title">Public Cargo Tracking & Checkpoint History</div>
+                <p class="help-text">Public parcel search with visual milestone stepper and audit trail.</p>
+            </div>
+            <div class="badge-group">
+                <span class="id-badge">US-05</span>
+                <span class="id-badge">BR-05</span>
+                <span class="id-badge">MVP (Screen)</span>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="wireframe-box" style="display: flex; gap: 10px; align-items: flex-end;">
+            <div style="flex: 1;">
+                <label>Enter Shipment Tracking Number</label>
+                <input type="text" value="LC-TRK-20261010-DEMO01">
+            </div>
+            <button class="btn btn-primary" style="height: 35px;">Search Status</button>
+        </div>
+
+        <!-- Active Tracking Result Card -->
+        <div class="wireframe-box" style="background: #ffffff;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-light); padding-bottom: 10px; margin-bottom: 15px;">
+                <div>
+                    <span class="help-text">Tracking Reference:</span>
+                    <h3 style="font-family: monospace;">LC-TRK-20261010-DEMO01</h3>
+                </div>
+                <div style="text-align: right;">
+                    <span class="help-text">Current State:</span>
+                    <div style="font-weight: 700; font-size: 16px;">IN TRANSIT</div>
+                </div>
+            </div>
+
+            <!-- Visual Progress Stepper -->
+            <div class="stepper">
+                <div class="step-item active">
+                    <div class="step-circle">&#10003;</div>
+                    <div style="font-size: 12px; font-weight: 700;">Order Pending</div>
+                    <div class="help-text">10 Oct, 09:00</div>
+                </div>
+                <div class="step-item active">
+                    <div class="step-circle">&#10003;</div>
+                    <div style="font-size: 12px; font-weight: 700;">Dispatched</div>
+                    <div class="help-text">10 Oct, 11:30</div>
+                </div>
+                <div class="step-item active">
+                    <div class="step-circle">&#9679;</div>
+                    <div style="font-size: 12px; font-weight: 700;">In Transit</div>
+                    <div class="help-text">10 Oct, 15:45</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle">&bull;</div>
+                    <div style="font-size: 12px; font-weight: 700;">Delivered</div>
+                    <div class="help-text">Estimated 11 Oct</div>
+                </div>
+            </div>
+
+            <!-- Shipment Details Grid -->
+            <div class="grid-4" style="margin: 20px 0; padding: 12px; background: var(--box-gray);">
+                <div>
+                    <label>Origin Depot</label>
+                    <div>WH-DEL-01 (Delhi Hub)</div>
+                </div>
+                <div>
+                    <label>Destination</label>
+                    <div>Sector 62, Noida (U.P.)</div>
+                </div>
+                <div>
+                    <label>Cargo Contents</label>
+                    <div>5kVA Solar Inverter (x4)</div>
+                </div>
+                <div>
+                    <label>Assigned Vehicle</label>
+                    <div>DL-01-TR-9021 (Cargo Truck)</div>
+                </div>
+            </div>
+
+            <!-- Chronological Checkpoint Timeline Table -->
+            <h4 style="margin: 16px 0 6px 0;">Checkpoint Audit Timeline</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 180px;">Timestamp</th>
+                        <th>Checkpoint Location</th>
+                        <th>Status Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>10-Oct-2026 15:45</td>
+                        <td>Yamuna Expressway Toll Plaza</td>
+                        <td>In transit through regional transit corridor</td>
+                    </tr>
+                    <tr>
+                        <td>10-Oct-2026 11:30</td>
+                        <td>Northern Regional Depot, Delhi</td>
+                        <td>Cargo inspected, loaded onto vehicle, and dispatched</td>
+                    </tr>
+                    <tr>
+                        <td>10-Oct-2026 09:00</td>
+                        <td>Order Booking System</td>
+                        <td>Shipment order created and stock verified</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SCREEN 6: FLEET MANAGEMENT & MAINTENANCE LOCKOUT (FINAL SCOPE)  -->
+    <!-- ============================================================== -->
+    <section id="screen-fleet" class="screen-container final-scope">
+        <div class="screen-meta">
+            <div>
+                <div class="screen-title">Fleet Asset Management & Maintenance Guardrail</div>
+                <p class="help-text">Vehicle operational statuses and maintenance lockout controls.</p>
+            </div>
+            <div class="badge-group">
+                <span class="id-badge">US-04</span>
+                <span class="id-badge">BR-04</span>
+                <span class="final-badge">Final Scope</span>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Vehicle Edit / Registration Form -->
+            <div class="wireframe-box">
+                <h4 style="margin-bottom: 12px;">Update Vehicle Operational Status</h4>
+                <div class="form-group">
+                    <label>Registration Number</label>
+                    <input type="text" value="DL-01-TR-3399" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Vehicle Type</label>
+                    <select disabled>
+                        <option>Cargo Truck (Payload Capacity: 8000 kg)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Operational Status (*Guards Dispatch [BR-04])</label>
+                    <select>
+                        <option selected>MAINTENANCE (Locked from active dispatches)</option>
+                        <option>AVAILABLE (Ready for assignment)</option>
+                        <option>IN_TRANSIT (Currently executing trip)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Maintenance Reason / Workshop Log</label>
+                    <textarea rows="3">Brake overhaul and hydraulic system inspection in progress. Estimated return: 12 Oct.</textarea>
+                </div>
+                <button class="btn btn-primary btn-block">Update Status Lock</button>
+            </div>
+
+            <!-- Fleet Inventory Table -->
+            <div class="wireframe-box">
+                <h4 style="margin-bottom: 10px;">Fleet Roster</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reg Number</th>
+                            <th>Type</th>
+                            <th>Capacity</th>
+                            <th>Current Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>DL-01-TR-9021</code></td>
+                            <td>TRUCK</td>
+                            <td>5000 kg</td>
+                            <td><strong style="color: #222;">AVAILABLE</strong></td>
+                        </tr>
+                        <tr>
+                            <td><code>MH-02-VN-4412</code></td>
+                            <td>VAN</td>
+                            <td>1500 kg</td>
+                            <td><strong style="color: #222;">AVAILABLE</strong></td>
+                        </tr>
+                        <tr style="background: #f0f0f0;">
+                            <td><code>DL-01-TR-3399</code></td>
+                            <td>TRUCK</td>
+                            <td>8000 kg</td>
+                            <td><strong style="text-decoration: underline;">MAINTENANCE [LOCKED]</strong></td>
+                        </tr>
+                        <tr>
+                            <td><code>KA-05-BS-1100</code></td>
+                            <td>BUS</td>
+                            <td>30 seats</td>
+                            <td><strong style="color: #222;">AVAILABLE</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ============================================================== -->
+    <!-- SCREEN 7: TRANSIT SCHEDULES & SEAT BOOKING (FINAL SCOPE)       -->
+    <!-- ============================================================== -->
+    <section id="screen-transit" class="screen-container final-scope">
+        <div class="screen-meta">
+            <div>
+                <div class="screen-title">Public Transit Timetables & Seat Booking</div>
+                <p class="help-text">Fixed bus route schedules with vehicle seat capacity enforcement.</p>
+            </div>
+            <div class="badge-group">
+                <span class="id-badge">US-06</span>
+                <span class="id-badge">BR-06</span>
+                <span class="final-badge">Final Scope</span>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="wireframe-box" style="display: flex; gap: 10px; align-items: flex-end;">
+            <div style="flex: 1;">
+                <label>Origin Stop</label>
+                <input type="text" placeholder="e.g. Central Terminal">
+            </div>
+            <div style="flex: 1;">
+                <label>Destination Stop</label>
+                <input type="text" placeholder="e.g. Airport Terminal 3">
+            </div>
+            <button class="btn btn-primary" style="height: 35px;">Filter Schedules</button>
+        </div>
+
+        <div class="grid-2">
+            <!-- Timetable List -->
+            <div class="wireframe-box">
+                <h4 style="margin-bottom: 10px;">Available Departures</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Route & Corridor</th>
+                            <th>Dept. Time</th>
+                            <th>Fare</th>
+                            <th>Seats Left</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <strong>ROUTE-101</strong><br>
+                                <span class="help-text">Central &rarr; Airport T3</span>
+                            </td>
+                            <td>11-Oct 08:00</td>
+                            <td>&#8377;75</td>
+                            <td><strong>18 seats</strong></td>
+                            <td><button class="btn" style="padding: 2px 8px;">Select</button></td>
+                        </tr>
+                        <tr style="background: #eeeeee;">
+                            <td>
+                                <strong>ROUTE-102</strong><br>
+                                <span class="help-text">ISBT &rarr; Cyber City</span>
+                            </td>
+                            <td>11-Oct 09:00</td>
+                            <td>&#8377;60</td>
+                            <td><strong style="color: #666;">SOLD OUT (0)</strong></td>
+                            <td><button class="btn" style="padding: 2px 8px;" disabled>Full</button></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>ROUTE-201</strong><br>
+                                <span class="help-text">CSMT &rarr; BKC Hub</span>
+                            </td>
+                            <td>11-Oct 13:00</td>
+                            <td>&#8377;40</td>
+                            <td><strong>1 seat left!</strong></td>
+                            <td><button class="btn" style="padding: 2px 8px;">Select</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Seat Reservation Form -->
+            <div class="wireframe-box">
+                <h4 style="margin-bottom: 12px;">Reserve Bus Ticket</h4>
+                <div style="background: var(--box-gray-dark); padding: 8px 12px; margin-bottom: 12px; font-size: 12px;">
+                    <strong>Selected:</strong> ROUTE-101 (Central &rarr; Airport T3)<br>
+                    <strong>Bus:</strong> DL-01-BS-2200 (Capacity: 25 Seats) | <strong>Fare:</strong> &#8377;75.00
+                </div>
+                <div class="form-group">
+                    <label>Passenger Full Name</label>
+                    <input type="text" placeholder="e.g. Rahul Sharma">
+                </div>
+                <div class="form-group">
+                    <label>Passenger Email Address</label>
+                    <input type="email" placeholder="e.g. rahul@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Seat Number (1 to 25)</label>
+                    <input type="number" min="1" max="25" value="7">
+                    <span class="help-text">[BR-06] Rejects reservation if seat &gt; capacity or already booked.</span>
+                </div>
+                <button class="btn btn-primary btn-block">Confirm Seat Reservation</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Simple Tab Switching JavaScript -->
+    <script>
+        function showScreen(screenId) {
+            // Hide all screens
+            const screens = document.querySelectorAll('.screen-container');
+            screens.forEach(s => s.classList.remove('active'));
+
+            // Show selected screen
+            const target = document.getElementById(screenId);
+            if (target) {
+                target.classList.add('active');
+            }
+
+            // Update active nav button
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            // Match active button by onclick attribute content
+            buttons.forEach(b => {
+                if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(screenId)) {
+                    b.classList.add('active');
+                }
+            });
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>

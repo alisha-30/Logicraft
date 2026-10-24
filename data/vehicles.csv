@@ -1,0 +1,26 @@
+id,registration_number,vehicle_type,capacity,status,notes,updated_at
+1,DL-01-TR-3399,TRUCK,8000,MAINTENANCE,[EDGE-CASE TC-04.2] Workshop engine overhaul in progress,2026-09-30 09:00:00
+2,MH-06-TR-5669,TRUCK,4000,AVAILABLE,Regular operational vehicle 2,2026-09-25 09:00:00
+3,WB-12-TR-5956,TRUCK,10000,AVAILABLE,Regular operational vehicle 3,2026-09-11 09:00:00
+4,GJ-14-TR-5905,TRUCK,4000,IN_TRANSIT,Regular operational vehicle 4,2026-09-01 09:00:00
+5,MH-05-TR-2891,TRUCK,4000,AVAILABLE,Regular operational vehicle 5,2026-09-02 09:00:00
+6,GJ-09-TR-3546,TRUCK,4000,AVAILABLE,Regular operational vehicle 6,2026-09-22 09:00:00
+7,WB-04-TR-6617,TRUCK,8000,AVAILABLE,Regular operational vehicle 7,2026-09-24 09:00:00
+8,WB-08-TR-5114,TRUCK,8000,AVAILABLE,Regular operational vehicle 8,2026-09-02 09:00:00
+9,DL-11-TR-7939,TRUCK,4000,AVAILABLE,Regular operational vehicle 9,2026-09-04 09:00:00
+10,DL-01-TR-6464,TRUCK,8000,IN_TRANSIT,Regular operational vehicle 10,2026-09-06 09:00:00
+11,GJ-05-TR-3647,TRUCK,5000,AVAILABLE,Regular operational vehicle 11,2026-09-07 09:00:00
+12,WB-12-TR-8007,TRUCK,10000,IN_TRANSIT,Regular operational vehicle 12,2026-09-13 09:00:00
+13,DL-02-VA-3442,VAN,1200,AVAILABLE,Regular operational vehicle 13,2026-09-13 09:00:00
+14,KA-10-VA-3426,VAN,1200,AVAILABLE,Regular operational vehicle 14,2026-09-17 09:00:00
+15,DL-05-VA-6974,VAN,1200,IN_TRANSIT,Regular operational vehicle 15,2026-09-02 09:00:00
+16,KA-04-VA-5088,VAN,1200,IN_TRANSIT,Regular operational vehicle 16,2026-09-09 09:00:00
+17,KA-13-VA-7658,VAN,1200,AVAILABLE,Regular operational vehicle 17,2026-09-11 09:00:00
+18,MH-04-VA-3662,VAN,2000,IN_TRANSIT,Regular operational vehicle 18,2026-09-05 09:00:00
+19,TN-01-VA-3938,VAN,1200,AVAILABLE,Regular operational vehicle 19,2026-09-07 09:00:00
+20,TN-13-VA-5065,VAN,1500,AVAILABLE,Regular operational vehicle 20,2026-09-22 09:00:00
+21,GJ-02-BU-7267,BUS,25,AVAILABLE,Regular operational vehicle 21,2026-09-03 09:00:00
+22,TN-04-BU-4269,BUS,25,AVAILABLE,Regular operational vehicle 22,2026-09-04 09:00:00
+23,KA-05-BU-4728,BUS,30,AVAILABLE,Regular operational vehicle 23,2026-09-23 09:00:00
+24,GJ-04-BU-7528,BUS,25,AVAILABLE,Regular operational vehicle 24,2026-09-20 09:00:00
+25,DL-13-BU-5573,BUS,30,AVAILABLE,Regular operational vehicle 25,2026-09-19 09:00:00

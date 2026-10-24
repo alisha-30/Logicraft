@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+
+{% block title %}Operations Dashboard | LogiCraft{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js 4.4.x CDN (Client-side rendering, zero build pipeline) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+    .kpi-card {
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+    .chart-container {
+        position: relative;
+        height: 260px;
+        width: 100%;
+    }
+    @media (max-width: 575.98px) {
+        .chart-container {
+            height: 220px;
+        }
+    }
+    .status-badge {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+    .checkpoint-timeline {
+        position: relative;
+        padding-left: 20px;
+    }
+    .checkpoint-timeline::before {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 6px;
+        bottom: 6px;
+        width: 2px;
+        background: #e2e8f0;
+    }
+    .checkpoint-node {
+        position: relative;
+        margin-bottom: 16px;
+    }
+    .checkpoint-node::before {
+        content: '';
+        position: absolute;
+        left: -18px;
+        top: 4px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #0284c7;
+        border: 2px solid #ffffff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ============================================================== -->
+<!-- 1. DASHBOARD HEADER & EXECUTIVE CONTROLS                       -->
+<!-- BACKEND INTEGRATION: logistics.views.home_view (stats context) -->
+<!-- ============================================================== -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center pb-3 mb-4 border-bottom">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <h2 class="h3 fw-bold text-dark mb-0">Operations Performance Dashboard</h2>
+            <span class="badge bg-primary px-2 py-1">Role: Operations Director</span>
+        </div>
+        <p class="text-muted small mb-0">
+            Real-time multi-depot inventory tracking, fleet readiness metrics, and transit capacity monitoring.
+        </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-3 mt-md-0">
+        <a href="{% url 'track_shipment' %}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+            <i class="bi bi-search"></i> Quick Track
+        </a>
+        <a href="{% url 'transit_schedules' %}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+            <i class="bi bi-bus-front"></i> Transit Timetables
+        </a>
+        <a href="/admin/" class="btn btn-dark btn-sm d-flex align-items-center gap-1" target="_blank">
+            <i class="bi bi-sliders"></i> Staff Back-Office
+        </a>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- 2. ACTIONABLE OPERATIONAL ALERTS (Edge Cases from docs/09)     -->
+<!-- ============================================================== -->
+{% if low_stock_items or maintenance_vehicles %}
+<div class="row g-3 mb-4">
+    {% if low_stock_items %}
+    <div class="col-md-6">
+        <div class="alert alert-warning d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between py-2 px-3 mb-0 gap-2" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-warning flex-shrink-0"></i>
+                <div class="small">
+                    <strong>Inventory Warning (Low Stock):</strong>
+                    {% for item in low_stock_items %}
+                        <span class="badge bg-light text-dark border ms-1">{{ item.sku }}: {{ item.quantity }} {{ item.unit }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <a href="/admin/logistics/inventoryitem/" class="btn btn-sm btn-outline-dark py-0 align-self-end align-self-sm-center" target="_blank">Restock</a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if maintenance_vehicles %}
+    <div class="col-md-6">
+        <div class="alert alert-danger d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between py-2 px-3 mb-0 gap-2" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-wrench-adjustable-circle-fill fs-5 me-2 text-danger flex-shrink-0"></i>
+                <div class="small">
+                    <strong>Fleet Notice:</strong> {{ maintenance_vehicles.count }} vehicle(s) currently under repair & locked.
+                    {% for v in maintenance_vehicles %}
+                        <span class="badge bg-dark text-white ms-1">{{ v.registration_number }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <a href="/admin/logistics/vehicle/" class="btn btn-sm btn-outline-dark py-0 align-self-end align-self-sm-center" target="_blank">Inspect</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ============================================================== -->
+<!-- 3. PRIMARY OPERATIONAL KPI METRICS                             -->
+<!-- BACKEND INTEGRATION: Count & Sum aggregations on models        -->
+<!-- ============================================================== -->
+<div class="row g-3 mb-4">
+    <!-- Total Warehouses -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card kpi-card p-3 h-100 bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Warehouses</span>
+                    <h3 class="fw-bold my-1 text-primary">{{ stats.total_warehouses }}</h3>
+                    <div class="small text-muted">{{ stats.total_inventory_units }} units in storage</div>
+                </div>
+                <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-building"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory SKUs -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card kpi-card p-3 h-100 bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Catalog SKUs</span>
+                    <h3 class="fw-bold my-1 text-success">{{ stats.total_inventory_skus }}</h3>
+                    <div class="small text-muted">Across 8 regional hubs</div>
+                </div>
+                <div class="icon-box bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-boxes"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fleet Available -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card kpi-card p-3 h-100 bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Fleet Readiness</span>
+                    <h3 class="fw-bold my-1 text-warning">
+                        {{ stats.vehicles_available }} <span class="fs-6 text-muted fw-normal">/ {{ stats.vehicles_total }}</span>
+                    </h3>
+                    <div class="small text-muted">
+                        {{ stats.vehicles_in_transit }} transit &bull; {{ stats.vehicles_maintenance }} maint.
+                    </div>
+                </div>
+                <div class="icon-box bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-truck"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Shipments -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card kpi-card p-3 h-100 bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Active Shipments</span>
+                    <h3 class="fw-bold my-1 text-info">{{ stats.shipments_active }}</h3>
+                    <div class="small text-muted">{{ stats.shipments_delivered }} delivered total</div>
+                </div>
+                <div class="icon-box bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-send-check"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- 4. ANALYTICAL CHARTS SECTION (Chart.js via HTML5 Canvas)       -->
+<!-- BACKEND INTEGRATION: Aggregated JSON context in view           -->
+<!-- ============================================================== -->
+<div class="row g-4 mb-4">
+    <!-- Chart 1: Stock Volume by Warehouse Depot -->
+    <div class="col-lg-7">
+        <div class="card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-bar-chart-fill text-primary me-2"></i>Stock Inventory by Regional Depot (Units)
+                </h6>
+                <span class="badge bg-light text-muted border">80/20 Hub Distribution</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="warehouseStockChart"></canvas>
+            </div>
+            <div class="small text-muted text-center mt-2">
+                Depots with higher capacity (Delhi WH-DEL-01, Mumbai WH-MUM-01) serve as primary regional freight hubs.
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 2: Fleet Status & Health Distribution -->
+    <div class="col-lg-5">
+        <div class="card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-pie-chart-fill text-info me-2"></i>Fleet Status Allocation
+                </h6>
+                <span class="badge bg-light text-muted border">Total: {{ stats.vehicles_total }} Assets</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="fleetStatusChart"></canvas>
+            </div>
+            <div class="small text-muted text-center mt-2">
+                Vehicles in maintenance are automatically excluded from dispatch dropdowns.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- 5. RECENT ACTIVITY & CHECKPOINTS AUDIT                         -->
+<!-- BACKEND INTEGRATION: Shipment & ShipmentCheckpoint queries     -->
+<!-- ============================================================== -->
+<div class="row g-4">
+    <!-- Recent Shipments Table -->
+    <div class="col-lg-8">
+        <div class="card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-clock-history text-secondary me-2"></i>Recent Outbound Shipments
+                </h6>
+                <div class="d-flex gap-2">
+                    <a href="/admin/logistics/shipment/" class="btn btn-sm btn-outline-secondary" target="_blank">
+                        <i class="bi bi-plus-circle me-1"></i> New Dispatch
+                    </a>
+                </div>
+            </div>
+
+            {% if recent_shipments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Tracking Code</th>
+                            <th>Origin Depot</th>
+                            <th>Cargo Item</th>
+                            <th>Assigned Fleet</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for shp in recent_shipments %}
+                        <tr>
+                            <td>
+                                <code class="fw-bold text-dark">{{ shp.tracking_number }}</code>
+                                {% if shp.driver_name %}
+                                    <div class="small text-muted"><i class="bi bi-person me-1"></i>{{ shp.driver_name }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ shp.origin_warehouse.code }}</strong>
+                                <div class="small text-muted">{{ shp.origin_warehouse.name|truncatechars:20 }}</div>
+                            </td>
+                            <td>
+                                {{ shp.item.name }}
+                                <span class="badge bg-light text-dark border">x{{ shp.quantity }}</span>
+                            </td>
+                            <td>
+                                {% if shp.vehicle %}
+                                    <span class="small fw-semibold">{{ shp.vehicle.registration_number }}</span>
+                                    <div class="small text-muted">{{ shp.vehicle.get_vehicle_type_display }}</div>
+                                {% else %}
+                                    <span class="text-muted small"><em>Unassigned</em></span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if shp.status == 'DELIVERED' %}
+                                    <span class="status-badge bg-success text-white">DELIVERED</span>
+                                {% elif shp.status == 'IN_TRANSIT' %}
+                                    <span class="status-badge bg-primary text-white">IN TRANSIT</span>
+                                {% elif shp.status == 'DISPATCHED' %}
+                                    <span class="status-badge bg-info text-dark">DISPATCHED</span>
+                                {% elif shp.status == 'PENDING' %}
+                                    <span class="status-badge bg-secondary text-white">PENDING</span>
+                                {% else %}
+                                    <span class="status-badge bg-danger text-white">{{ shp.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'track_shipment' %}?q={{ shp.tracking_number }}" class="btn btn-sm btn-outline-primary py-0">
+                                    Track
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                <p class="mb-0">No shipments found in database. Run <code>python manage.py load_csv_data</code> to populate.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Checkpoints Audit Feed & Transit Overview -->
+    <div class="col-lg-4">
+        <!-- Live Transit Checkpoint Stream -->
+        <div class="card p-3 mb-3">
+            <h6 class="fw-bold text-dark mb-3">
+                <i class="bi bi-signpost-split-fill text-primary me-2"></i>Live Checkpoint Feed
+            </h6>
+            {% if recent_checkpoints %}
+            <div class="checkpoint-timeline">
+                {% for cp in recent_checkpoints %}
+                <div class="checkpoint-node">
+                    <div class="small fw-bold text-dark">{{ cp.location_name }}</div>
+                    <div class="small text-muted">{{ cp.status_note }}</div>
+                    <div class="small text-secondary" style="font-size: 11px;">
+                        Shipment <code>{{ cp.shipment.tracking_number|truncatechars:18 }}</code> &bull; {{ cp.timestamp|date:"d M, H:i" }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-muted small py-3 text-center">
+                <em>No recent checkpoints logged.</em>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Municipal Transit Timetable Card -->
+        <div class="card p-3 bg-light border-0">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold mb-0"><i class="bi bi-bus-front text-primary me-2"></i>Public Transit Summary</h6>
+                <span class="badge bg-dark">{{ stats.transit_routes }} Routes</span>
+            </div>
+            <p class="small text-muted mb-2">
+                <strong>{{ stats.transit_schedules }}</strong> scheduled departures operating across major transit corridors.
+                <strong>{{ stats.transit_bookings }}</strong> passenger seats currently booked.
+            </p>
+            <a href="{% url 'transit_schedules' %}" class="btn btn-primary btn-sm w-100">
+                Browse Timetables & Book Seats
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- ============================================================== -->
+<!-- 6. CHART.JS INITIALIZATION SCRIPTS                             -->
+<!-- ============================================================== -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Warehouse Stock Bar Chart
+    const whLabels = {{ chart_wh_labels|safe }};
+    const whUnits = {{ chart_wh_units|safe }};
+
+    const ctxWh = document.getElementById('warehouseStockChart');
+    if (ctxWh) {
+        new Chart(ctxWh, {
+            type: 'bar',
+            data: {
+                labels: whLabels,
+                datasets: [{
+                    label: 'Inventory Units on Hand',
+                    data: whUnits,
+                    backgroundColor: '#0284c7',
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 200 }
+                    }
+                }
+            }
+        });
+    }
+
+    // 2. Fleet Status Donut Chart
+    const fleetLabels = {{ chart_fleet_labels|safe }};
+    const fleetCounts = {{ chart_fleet_counts|safe }};
+
+    const ctxFleet = document.getElementById('fleetStatusChart');
+    if (ctxFleet) {
+        new Chart(ctxFleet, {
+            type: 'doughnut',
+            data: {
+                labels: fleetLabels,
+                datasets: [{
+                    data: fleetCounts,
+                    backgroundColor: ['#16a34a', '#0284c7', '#d97706'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 12 } }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

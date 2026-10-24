@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Book Seat | LogiCraft{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card p-4 shadow-sm bg-white">
+            <h4 class="fw-bold mb-3"><i class="bi bi-ticket-perforated me-2 text-primary"></i>Reserve Bus Ticket</h4>
+            
+            <div class="p-3 bg-light rounded mb-4">
+                <div class="d-flex justify-content-between mb-1">
+                    <strong>{{ schedule.route.route_code }}</strong>
+                    <span class="text-success fw-bold">Fare: ₹{{ schedule.fare }}</span>
+                </div>
+                <div class="small text-muted mb-2">
+                    {{ schedule.route.origin_stop }} &rarr; {{ schedule.route.destination_stop }}
+                </div>
+                <div class="small">
+                    <strong>Departure:</strong> {{ schedule.departure_time|date:"d M Y, H:i" }}<br>
+                    <strong>Vehicle:</strong> {{ schedule.vehicle.registration_number }}<br>
+                    <strong>Remaining Seats:</strong> <span class="badge bg-success">{{ seats_left }}</span>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Passenger Full Name</label>
+                    <input type="text" name="passenger_name" class="form-control" required placeholder="e.g. Rahul Sharma">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Email Address (for ticket receipt)</label>
+                    <input type="email" name="passenger_email" class="form-control" required placeholder="e.g. rahul@example.com">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold">Seat Number (1 to {{ schedule.vehicle.capacity }})</label>
+                    <input type="number" name="seat_number" min="1" max="{{ schedule.vehicle.capacity }}" class="form-control" required placeholder="Enter desired seat number">
+                    <div class="form-text small">Vehicle capacity is {{ schedule.vehicle.capacity }} seats.</div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'transit_schedules' %}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                        Confirm Reservation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

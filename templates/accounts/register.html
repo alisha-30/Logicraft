@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Register Staff Account | LogiCraft{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+        <!-- Registration Card Container -->
+        <div class="card p-4 shadow-sm border-0 bg-white">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-dark text-info p-3 rounded-circle mb-3">
+                    <i class="bi bi-person-plus fs-2"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-1">Register Staff Account</h3>
+                <p class="text-muted small mb-0">Create an authorized user account for logistics and fleet operations</p>
+            </div>
+
+            <!-- Registration Form -->
+            <form method="POST" id="registerForm" novalidate>
+                {% csrf_token %}
+
+                <!-- Username Input -->
+                <div class="mb-3">
+                    <label for="regUsername" class="form-label small fw-semibold text-uppercase">
+                        Username <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person-badge"></i></span>
+                        <input type="text" 
+                               name="username" 
+                               id="regUsername" 
+                               class="form-control border-start-0" 
+                               placeholder="Choose a unique username" 
+                               value="{{ username|default:'' }}" 
+                               required 
+                               autofocus>
+                    </div>
+                    <div class="form-text small">Must be unique across the logistics network.</div>
+                </div>
+
+                <!-- Email Input -->
+                <div class="mb-3">
+                    <label for="regEmail" class="form-label small fw-semibold text-uppercase">
+                        Corporate Email <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                        <input type="email" 
+                               name="email" 
+                               id="regEmail" 
+                               class="form-control border-start-0" 
+                               placeholder="e.g. staff@example.com" 
+                               value="{{ email|default:'' }}" 
+                               required>
+                    </div>
+                    <div class="form-text small text-muted">
+                        <i class="bi bi-shield-check me-1 text-success"></i>Privacy Standard: Standard test domains (<code>@example.com</code>) encouraged.
+                    </div>
+                </div>
+
+                <!-- Operational Role Domain -->
+                <div class="mb-3">
+                    <label for="regRole" class="form-label small fw-semibold text-uppercase">
+                        Operational Role Domain <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-briefcase"></i></span>
+                        <select name="role" id="regRole" class="form-select border-start-0">
+                            <option value="DISPATCHER" {% if role == 'DISPATCHER' %}selected{% endif %}>
+                                Fleet Dispatcher (Cargo Allocation & Tracking)
+                            </option>
+                            <option value="SUPERVISOR" {% if role == 'SUPERVISOR' %}selected{% endif %}>
+                                Warehouse Supervisor (Storage & Inventory)
+                            </option>
+                            <option value="DIRECTOR" {% if role == 'DIRECTOR' %}selected{% endif %}>
+                                Operations Director (Executive Dashboard & Performance)
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-text small">Determines permission boundaries and default views.</div>
+                </div>
+
+                <!-- Password Row -->
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label for="regPassword" class="form-label small fw-semibold text-uppercase">
+                            Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="password" 
+                                   name="password" 
+                                   id="regPassword" 
+                                   class="form-control border-end-0" 
+                                   placeholder="Min 6 characters" 
+                                   required>
+                            <button type="button" class="btn btn-outline-secondary border-start-0 toggle-pass" data-target="regPassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="regConfirmPassword" class="form-label small fw-semibold text-uppercase">
+                            Confirm Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input type="password" 
+                                   name="confirm_password" 
+                                   id="regConfirmPassword" 
+                                   class="form-control border-end-0" 
+                                   placeholder="Re-enter password" 
+                                   required>
+                            <button type="button" class="btn btn-outline-secondary border-start-0 toggle-pass" data-target="regConfirmPassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div id="passwordMatchFeedback" class="small mt-1 d-none"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Button with Loading State -->
+                <div class="d-grid mb-3 mt-4">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold" id="regSubmitBtn">
+                        <span id="regBtnText"><i class="bi bi-check2-circle me-1"></i> Create Staff Account</span>
+                        <span id="regBtnSpinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Link to Login -->
+            <div class="text-center pt-2 border-top">
+                <span class="small text-muted">Already registered with LogiCraft?</span>
+                <a href="{% url 'login' %}" class="small text-primary fw-semibold ms-1 text-decoration-none">
+                    Sign in to your account &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Password Visibility Toggles
+    const toggleButtons = document.querySelectorAll(".toggle-pass");
+    toggleButtons.forEach(btn => {
+        btn.addEventListener("click", function() {
+            const targetId = this.getAttribute("data-target");
+            const inputField = document.getElementById(targetId);
+            const icon = this.querySelector("i");
+
+            if (inputField && icon) {
+                if (inputField.type === "password") {
+                    inputField.type = "text";
+                    icon.classList.remove("bi-eye");
+                    icon.classList.add("bi-eye-slash");
+                } else {
+                    inputField.type = "password";
+                    icon.classList.remove("bi-eye-slash");
+                    icon.classList.add("bi-eye");
+                }
+            }
+        });
+    });
+
+    // 2. Real-Time Password Matching Validator
+    const pass1 = document.getElementById("regPassword");
+    const pass2 = document.getElementById("regConfirmPassword");
+    const feedback = document.getElementById("passwordMatchFeedback");
+
+    function checkPasswordMatch() {
+        if (!pass1.value || !pass2.value) {
+            feedback.classList.add("d-none");
+            return;
+        }
+
+        feedback.classList.remove("d-none");
+        if (pass1.value === pass2.value) {
+            feedback.className = "small mt-1 text-success fw-semibold";
+            feedback.innerHTML = '<i class="bi bi-check-circle me-1"></i> Passwords match.';
+        } else {
+            feedback.className = "small mt-1 text-danger fw-semibold";
+            feedback.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Passwords do not match.';
+        }
+    }
+
+    if (pass1 && pass2 && feedback) {
+        pass1.addEventListener("input", checkPasswordMatch);
+        pass2.addEventListener("input", checkPasswordMatch);
+    }
+
+    // 3. Loading Feedback on Submit
+    const form = document.getElementById("registerForm");
+    const submitBtn = document.getElementById("regSubmitBtn");
+    const btnText = document.getElementById("regBtnText");
+    const btnSpinner = document.getElementById("regBtnSpinner");
+
+    if (form && submitBtn) {
+        form.addEventListener("submit", function() {
+            if (!pass1.value || pass1.value !== pass2.value) {
+                return;
+            }
+            submitBtn.disabled = true;
+            btnText.textContent = "Creating Account...";
+            btnSpinner.classList.remove("d-none");
+
+            setTimeout(function() {
+                submitBtn.disabled = false;
+                btnText.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Create Staff Account';
+                btnSpinner.classList.add("d-none");
+            }, 6000);
+        });
+    }
+});
+</script>
+{% endblock %}

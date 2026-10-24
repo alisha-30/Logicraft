@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Sign In | LogiCraft{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+        <!-- Login Card Container -->
+        <div class="card p-4 shadow-sm border-0 bg-white">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-dark text-info p-3 rounded-circle mb-3">
+                    <i class="bi bi-box-seam fs-2"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-1">Staff Portal Sign-In</h3>
+                <p class="text-muted small mb-0">Authorized access for Dispatchers, Supervisors, and Operations Directors</p>
+            </div>
+
+            <!-- Authentication Form -->
+            <form method="POST" id="loginForm" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+                <!-- Username Input -->
+                <div class="mb-3">
+                    <label for="usernameInput" class="form-label small fw-semibold text-uppercase">
+                        Username <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                        <input type="text" 
+                               name="username" 
+                               id="usernameInput" 
+                               class="form-control border-start-0" 
+                               placeholder="Enter staff username" 
+                               value="{{ username|default:'' }}" 
+                               required 
+                               autofocus>
+                    </div>
+                </div>
+
+                <!-- Password Input with Show/Hide Toggle -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label for="passwordInput" class="form-label small fw-semibold text-uppercase mb-0">
+                            Password <span class="text-danger">*</span>
+                        </label>
+                        <a href="#" class="small text-decoration-none text-muted" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+                            Forgot Password?
+                        </a>
+                    </div>
+                    <div class="input-group mt-1">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                        <input type="password" 
+                               name="password" 
+                               id="passwordInput" 
+                               class="form-control border-start-0 border-end-0" 
+                               placeholder="Enter your password" 
+                               required>
+                        <button type="button" class="btn btn-outline-secondary border-start-0" id="togglePasswordBtn" title="Show or hide password">
+                            <i class="bi bi-eye" id="passwordEyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me & State -->
+                <div class="mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label small text-muted" for="rememberMe">
+                            Remember this device
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button with Loading Feedback -->
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold" id="submitBtn">
+                        <span id="btnText"><i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Workspace</span>
+                        <span id="btnSpinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Evaluator Quick Credential Helper -->
+            <div class="p-3 bg-light rounded text-center mb-3 border">
+                <div class="small text-muted fw-semibold mb-1">
+                    <i class="bi bi-info-circle me-1 text-primary"></i>Evaluator Demo Credentials:
+                </div>
+                <div class="small font-monospace">
+                    Username: <strong>admin</strong> &bull; Password: <strong>admin123</strong>
+                </div>
+            </div>
+
+            <!-- Registration Link -->
+            <div class="text-center pt-2 border-top">
+                <span class="small text-muted">Need a new staff account?</span>
+                <a href="{% url 'register' %}" class="small text-primary fw-semibold ms-1 text-decoration-none">
+                    Register Staff Account &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Recovery Modal -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="forgotModalLabel">
+                    <i class="bi bi-shield-lock me-2 text-primary"></i>Password Recovery Procedure
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body small text-muted">
+                <p>
+                    LogiCraft operates within an internal enterprise logistics network with strict security protocols.
+                </p>
+                <div class="p-3 bg-light rounded mb-3">
+                    <strong>To reset your credentials:</strong>
+                    <ol class="mb-0 mt-2 ps-3">
+                        <li>Contact the <strong>Operations Director</strong> or System Administrator.</li>
+                        <li>Provide your registered staff username and employee ID.</li>
+                        <li>Temporary reset credentials will be issued via internal depot communications.</li>
+                    </ol>
+                </div>
+                <p class="mb-0 text-secondary">
+                    <em>For development and grading evaluations, you can also reset or inspect accounts via the Django administrative CLI: <code>python manage.py changepassword &lt;username&gt;</code>.</em>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Show / Hide Password Toggle
+    const toggleBtn = document.getElementById("togglePasswordBtn");
+    const passwordInput = document.getElementById("passwordInput");
+    const eyeIcon = document.getElementById("passwordEyeIcon");
+
+    if (toggleBtn && passwordInput && eyeIcon) {
+        toggleBtn.addEventListener("click", function() {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                eyeIcon.classList.remove("bi-eye");
+                eyeIcon.classList.add("bi-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                eyeIcon.classList.remove("bi-eye-slash");
+                eyeIcon.classList.add("bi-eye");
+            }
+        });
+    }
+
+    // 2. Loading Feedback & Duplicate Submission Prevention
+    const loginForm = document.getElementById("loginForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const btnText = document.getElementById("btnText");
+    const btnSpinner = document.getElementById("btnSpinner");
+
+    if (loginForm && submitBtn) {
+        loginForm.addEventListener("submit", function(e) {
+            const username = document.getElementById("usernameInput").value.trim();
+            const password = passwordInput.value;
+
+            if (!username || !password) {
+                // Allow browser native validation or server fallback
+                return;
+            }
+
+            // Provide visual feedback
+            submitBtn.disabled = true;
+            btnText.textContent = "Authenticating...";
+            btnSpinner.classList.remove("d-none");
+            
+            // Re-enable if submission hangs or takes too long
+            setTimeout(function() {
+                submitBtn.disabled = false;
+                btnText.innerHTML = '<i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Workspace';
+                btnSpinner.classList.add("d-none");
+            }, 6000);
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+id,route_code,origin_stop,destination_stop,duration_minutes
+1,ROUTE-101,"Central Bus Terminal, Delhi",Indira Gandhi Airport Terminal 3,45
+2,ROUTE-102,Kashmere Gate ISBT,"Cyber City Metro Station, Gurugram",60
+3,ROUTE-201,Chhatrapati Shivaji Maharaj Terminus,"Bandra Kurla Complex (BKC), Mumbai",35
+4,ROUTE-202,Dadar Western Terminal,Navi Mumbai Vashi Plaza,50
+5,ROUTE-301,Majestic Kempegowda Bus Station,"Electronic City Phase 1, Bengaluru",55
+6,ROUTE-302,Whitefield ITPL,Kempegowda International Airport,65
+7,ROUTE-401,Howrah Railway Station,"Salt Lake Sector V, Kolkata",40
+8,ROUTE-501,Secunderabad Station,"Hitec City Cyber Towers, Hyderabad",45

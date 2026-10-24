@@ -1,0 +1,453 @@
+{% extends 'base.html' %}
+
+{% block title %}Outbound Shipment Dispatch - LogiCraft{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-3 shadow-sm border">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h2 class="h4 mb-0 fw-bold text-dark">
+                        <i class="bi bi-send text-primary me-2"></i>Outbound Shipment Dispatch & Stock Manifest
+                    </h2>
+                </div>
+                <p class="text-muted small mb-0">
+                    Manifest freight orders, assign verified roadworthy vehicles, and transactionally deduct depot inventory.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Shipment Dispatch Form -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white py-3">
+                <h5 class="card-title mb-0 fs-6 fw-semibold">
+                    <i class="bi bi-clipboard2-plus me-2 text-info"></i>Create Outbound Dispatch Order
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" action="{% url 'shipment_dispatch' %}" id="dispatchForm" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+                        <div>
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Group 1: Depot & Routing -->
+                    <div class="mb-4">
+                        <h6 class="text-uppercase text-muted fw-bold small border-bottom pb-2 mb-3">
+                            <i class="bi bi-building me-1"></i> 1. Origin Depot & Delivery Destination
+                        </h6>
+                        <div class="mb-3">
+                            <label for="id_origin_warehouse" class="form-label fw-semibold">
+                                Origin Warehouse Depot <span class="text-danger">*</span>
+                            </label>
+                            {{ form.origin_warehouse }}
+                            {% if form.origin_warehouse.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for err in form.origin_warehouse.errors %}{{ err }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i> Cargo items must be physically stored at the selected warehouse.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_destination_address" class="form-label fw-semibold">
+                                Delivery Destination Address <span class="text-danger">*</span>
+                            </label>
+                            {{ form.destination_address }}
+                            {% if form.destination_address.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for err in form.destination_address.errors %}{{ err }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Full recipient delivery address or consignee location.</div>
+                        </div>
+                    </div>
+
+                    <!-- Group 2: Cargo Item & Stock Volume -->
+                    <div class="mb-4">
+                        <h6 class="text-uppercase text-muted fw-bold small border-bottom pb-2 mb-3">
+                            <i class="bi bi-boxes me-1"></i> 2. Cargo Selection & Quantity
+                        </h6>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="id_item" class="form-label fw-semibold mb-0">
+                                    Select Cargo Item (SKU) <span class="text-danger">*</span>
+                                </label>
+                                <span id="stockPill" class="badge bg-secondary">Select an item</span>
+                            </div>
+                            {{ form.item }}
+                            {% if form.item.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for err in form.item.errors %}{{ err }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Listing shows current inventory levels across depots.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_quantity" class="form-label fw-semibold">
+                                Quantity to Ship <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                {{ form.quantity }}
+                                <span class="input-group-text bg-light" id="unitLabel">units</span>
+                            </div>
+                            {% if form.quantity.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for err in form.quantity.errors %}{{ err }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div id="stockDeficitAlert" class="alert alert-danger py-2 px-3 mt-2 d-none" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                <strong>Stock Deficit Warning:</strong> Requested quantity exceeds on-hand depot stock (<span id="alertMaxStock">0</span> available).
+                            </div>
+                            <div class="form-text">
+                                <i class="bi bi-shield-lock me-1"></i> Immediate dispatch will automatically deduct warehouse stock.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group 3: Fleet & Transit Assignment -->
+                    <div class="mb-4">
+                        <h6 class="text-uppercase text-muted fw-bold small border-bottom pb-2 mb-3">
+                            <i class="bi bi-truck me-1"></i> 3. Fleet Vehicle & Trip Execution
+                        </h6>
+
+                        <div class="mb-3">
+                            <label for="id_vehicle" class="form-label fw-semibold">
+                                Assign Transport Vehicle
+                            </label>
+                            {{ form.vehicle }}
+                            {% if form.vehicle.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for err in form.vehicle.errors %}{{ err }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div id="maintenanceAlert" class="alert alert-warning py-2 px-3 mt-2 d-none" role="alert">
+                                <i class="bi bi-slash-circle-fill me-1"></i>
+                                <strong>Vehicle Lockout:</strong> This vehicle is currently UNDER MAINTENANCE and cannot be dispatched!
+                            </div>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i> Only vehicles with status AVAILABLE are eligible for trip dispatch.
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_driver_name" class="form-label fw-semibold">
+                                    Freight Driver Name
+                                </label>
+                                {{ form.driver_name }}
+                                {% if form.driver_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for err in form.driver_name.errors %}{{ err }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Optional driver identity.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_status" class="form-label fw-semibold">
+                                    Initial Manifest State
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for err in form.status.errors %}{{ err }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label for="id_estimated_delivery_date" class="form-label fw-semibold">
+                                Estimated Delivery Date & Time
+                            </label>
+                            {{ form.estimated_delivery_date }}
+                            <div class="form-text">Target delivery timestamp for customer tracking.</div>
+                        </div>
+                    </div>
+
+                    <!-- Submit & Duplicate Submission Lock -->
+                    <div class="pt-3 border-top d-grid gap-2">
+                        <button type="submit" id="submitDispatchBtn" class="btn btn-primary btn-lg fw-bold shadow-sm py-2">
+                            <i class="bi bi-send-check me-2"></i> Confirm Dispatch & Deduct Inventory
+                        </button>
+                        <a href="{% url 'home' %}" class="btn btn-light border py-2 text-muted">
+                            Cancel & Return to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Verification Log & Rules Card -->
+    <div class="col-lg-5">
+        <!-- Verification Log Table -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 fs-6 fw-bold text-dark">
+                    <i class="bi bi-clock-history me-2 text-primary"></i>Dispatch Verification Log
+                </h5>
+                <span class="badge bg-light text-dark border">Recent 8</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tracking Code</th>
+                                <th>Item & Qty</th>
+                                <th>Depot</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for disp in recent_dispatches %}
+                            <tr>
+                                <td>
+                                    <span class="fw-semibold font-monospace">{{ disp.tracking_number|slice:":15" }}...</span>
+                                    <div class="text-muted" style="font-size: 11px;">{{ disp.created_at|date:"M d, H:i" }}</div>
+                                </td>
+                                <td>
+                                    <strong>{{ disp.item.name|truncatechars:18 }}</strong>
+                                    <div class="text-muted">Qty: {{ disp.quantity }} {{ disp.item.unit }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">{{ disp.origin_warehouse.code }}</span>
+                                </td>
+                                <td>
+                                    {% if disp.status == 'DISPATCHED' %}
+                                        <span class="badge bg-primary">DISPATCHED</span>
+                                    {% elif disp.status == 'IN_TRANSIT' %}
+                                        <span class="badge bg-info text-dark">IN TRANSIT</span>
+                                    {% elif disp.status == 'DELIVERED' %}
+                                        <span class="badge bg-success">DELIVERED</span>
+                                    {% elif disp.status == 'PENDING' %}
+                                        <span class="badge bg-secondary">PENDING</span>
+                                    {% else %}
+                                        <span class="badge bg-dark">{{ disp.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'track_shipment' %}?q={{ disp.tracking_number }}" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Track Live">
+                                        <i class="bi bi-geo-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    No dispatches recorded yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dispatch Safeguards Reference -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="card-title mb-0 fs-6 fw-bold text-dark">
+                    <i class="bi bi-shield-check me-2 text-success"></i>Dispatch Safeguards Active
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item px-0 d-flex gap-2">
+                        <i class="bi bi-check-circle-fill text-success fs-6 mt-1"></i>
+                        <div>
+                            <strong>Origin Depot Matching:</strong>
+                            <p class="text-muted mb-0">SKU must physically reside in the origin warehouse. Prevents phantom stock transfers.</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item px-0 d-flex gap-2">
+                        <i class="bi bi-check-circle-fill text-success fs-6 mt-1"></i>
+                        <div>
+                            <strong>Inventory Deficit Lockout:</strong>
+                            <p class="text-muted mb-0">System prevents dispatching more units than on-hand stock. Automatically deducts balance upon submission.</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item px-0 d-flex gap-2">
+                        <i class="bi bi-check-circle-fill text-success fs-6 mt-1"></i>
+                        <div>
+                            <strong>Fleet Maintenance Lockout:</strong>
+                            <p class="text-muted mb-0">Vehicles in <code>MAINTENANCE</code> status cannot be assigned to outbound trips.</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item px-0 d-flex gap-2">
+                        <i class="bi bi-check-circle-fill text-success fs-6 mt-1"></i>
+                        <div>
+                            <strong>Secure Transaction:</strong>
+                            <p class="text-muted mb-0">Shipment creation, inventory deduction, and audit milestone happen together. Reverts back safely if any step fails.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Client-side metadata from server
+    const itemsData = {{ items_json|safe }};
+    const vehiclesData = {{ vehicles_json|safe }};
+
+    const warehouseSelect = document.getElementById('id_origin_warehouse');
+    const itemSelect = document.getElementById('id_item');
+    const quantityInput = document.getElementById('id_quantity');
+    const vehicleSelect = document.getElementById('id_vehicle');
+    const statusSelect = document.getElementById('id_status');
+    const stockPill = document.getElementById('stockPill');
+    const unitLabel = document.getElementById('unitLabel');
+    const stockDeficitAlert = document.getElementById('stockDeficitAlert');
+    const alertMaxStock = document.getElementById('alertMaxStock');
+    const maintenanceAlert = document.getElementById('maintenanceAlert');
+    const dispatchForm = document.getElementById('dispatchForm');
+    const submitBtn = document.getElementById('submitDispatchBtn');
+
+    function updateStockDisplay() {
+        const selectedItemId = itemSelect.value;
+        if (selectedItemId && itemsData[selectedItemId]) {
+            const item = itemsData[selectedItemId];
+            const available = item.quantity;
+            unitLabel.textContent = item.unit;
+
+            if (available > 5) {
+                stockPill.className = 'badge bg-success';
+                stockPill.textContent = `Available: ${available} ${item.unit} at ${item.warehouse_code}`;
+            } else if (available > 0) {
+                stockPill.className = 'badge bg-warning text-dark';
+                stockPill.textContent = `Low Stock: ${available} ${item.unit} at ${item.warehouse_code}`;
+            } else {
+                stockPill.className = 'badge bg-danger';
+                stockPill.textContent = `OUT OF STOCK (0 ${item.unit})`;
+            }
+
+            // Sync warehouse if empty
+            if (!warehouseSelect.value && item.warehouse_id) {
+                warehouseSelect.value = item.warehouse_id;
+            }
+
+            validateQuantity(available);
+        } else {
+            stockPill.className = 'badge bg-secondary';
+            stockPill.textContent = 'Select an item';
+            unitLabel.textContent = 'units';
+            stockDeficitAlert.classList.add('d-none');
+            quantityInput.classList.remove('is-invalid');
+        }
+    }
+
+    function validateQuantity(maxAvailable) {
+        if (maxAvailable === undefined) {
+            const selectedItemId = itemSelect.value;
+            if (selectedItemId && itemsData[selectedItemId]) {
+                maxAvailable = itemsData[selectedItemId].quantity;
+            } else {
+                return;
+            }
+        }
+
+        const requested = parseInt(quantityInput.value, 10);
+        const isDispatched = (statusSelect.value === 'DISPATCHED');
+
+        if (isDispatched && requested > maxAvailable) {
+            alertMaxStock.textContent = `${maxAvailable} ${itemsData[itemSelect.value].unit}`;
+            stockDeficitAlert.classList.remove('d-none');
+            quantityInput.classList.add('is-invalid');
+        } else {
+            stockDeficitAlert.classList.add('d-none');
+            quantityInput.classList.remove('is-invalid');
+        }
+    }
+
+    function validateVehicle() {
+        const vehicleId = vehicleSelect.value;
+        if (vehicleId && vehiclesData[vehicleId]) {
+            if (vehiclesData[vehicleId].is_maintenance) {
+                maintenanceAlert.classList.remove('d-none');
+                vehicleSelect.classList.add('is-invalid');
+            } else {
+                maintenanceAlert.classList.add('d-none');
+                vehicleSelect.classList.remove('is-invalid');
+            }
+        } else {
+            maintenanceAlert.classList.add('d-none');
+            vehicleSelect.classList.remove('is-invalid');
+        }
+    }
+
+    // Event Listeners
+    itemSelect.addEventListener('change', updateStockDisplay);
+    quantityInput.addEventListener('input', () => validateQuantity());
+    statusSelect.addEventListener('change', () => validateQuantity());
+    vehicleSelect.addEventListener('change', validateVehicle);
+
+    // Initial check on page load (preserves state on validation bounce)
+    document.addEventListener('DOMContentLoaded', () => {
+        if (itemSelect.value) {
+            updateStockDisplay();
+        }
+        if (vehicleSelect.value) {
+            validateVehicle();
+        }
+    });
+
+    // Prevent duplicate submissions and display loading spinner
+    dispatchForm.addEventListener('submit', function(e) {
+        if (submitBtn.disabled) {
+            e.preventDefault();
+            return;
+        }
+
+        // Check if vehicle in maintenance or stock deficit
+        const vehicleId = vehicleSelect.value;
+        const selectedItemId = itemSelect.value;
+        const requested = parseInt(quantityInput.value, 10);
+        const isDispatched = (statusSelect.value === 'DISPATCHED');
+
+        if (vehicleId && vehiclesData[vehicleId] && vehiclesData[vehicleId].is_maintenance && isDispatched) {
+            e.preventDefault();
+            maintenanceAlert.classList.remove('d-none');
+            vehicleSelect.focus();
+            return;
+        }
+
+        if (selectedItemId && itemsData[selectedItemId] && isDispatched) {
+            if (requested > itemsData[selectedItemId].quantity) {
+                e.preventDefault();
+                stockDeficitAlert.classList.remove('d-none');
+                quantityInput.focus();
+                return;
+            }
+        }
+
+        // Lock button to prevent double-submit
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Manifesting & Deducting Stock...';
+    });
+</script>
+{% endblock %}
